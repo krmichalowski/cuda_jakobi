@@ -52,7 +52,7 @@ __global__ void jacobi_step(double* gpu_x, double* gpu_x_new, double* rhs, int b
     int offset = 2 * id;
     for(i=1+block_size*id;i<(1+id)*block_size-1;i++)
     {
-        gpu_x_new[i] = (rhs[i - offset] - gpu_x[i - 1] - gpu_x[i + 1])/(-2);
+        gpu_x_new[i] = (rhs[i - offset] - gpu_x[i - 1] - gpu_x[i + 1])/(4);
     }
 }
 
@@ -62,7 +62,7 @@ __global__ void rhs_fill(double* rhs, int size, int per_thread)
     int i;
     for(i=1+id*per_thread;i<1+(id+1)*per_thread;i++)
     {
-        rhs[i] = 0;
+        rhs[i] = 2.0;
     }
 }
 
@@ -80,8 +80,7 @@ void test_solution(double* rhs, double* x, int size)
     int i;
     for(i=1;i<size-1;i++)
     {
-        printf("%lf\n", rhs[i] + 2*x[i] - 1*x[i + 1] - 1*x[i - 1]);
-        //printf("%lf\n", x[i]);
+        printf("%lf\n", rhs[i] - 4*x[i] - 1*x[i + 1] - 1*x[i - 1]);
     }
 }
 
