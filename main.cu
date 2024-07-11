@@ -10,19 +10,22 @@ int main()
     int block_size = ((size - 2)/n_threads) + 2;
     int gpu_size = size + 2 * (n_threads) - 2;
 
-    double* do_testow = (double*)malloc(gpu_size * sizeof(double));
+    double* solution = (double*)malloc(size * sizeof(double));
+    double* rhs = (double*)malloc(size * sizeof(double));
 
     double* gpu_x;
     double* gpu_x_new;
-    double* rhs;
+    double* gpu_solution;
+    double* gpu_rhs;
     cudaMalloc(&gpu_x, gpu_size * sizeof(double));
     cudaMalloc(&gpu_x_new, gpu_size * sizeof(double));
-    cudaMalloc(&rhs, size * sizeof(double));
+    cudaMalloc(&gpu_rhs, size * sizeof(double));
+    cudaMalloc(&gpu_solution, size * sizeof(double));
 
     double x0 = 5.0;
     double xn = 1.0;
-    set_boundry<<<1,1>>>(gpu_x, rhs, x0, xn, gpu_size, size);
-    rhs_fill<<<1,n_threads>>>(rhs, size, (size - 2)/n_threads);
+    set_boundry<<<1,1>>>(gpu_x, gpu_rhs, gpu_x_new, gpu_solution, x0, xn, gpu_size, size);
+    rhs_fill<<<1,n_threads>>>(gpu_rhs, size, (size - 2)/n_threads);
 
     double guess = 2.0;
     int per_thread;
@@ -33,13 +36,11 @@ int main()
     initial_guess_finish<<<1,red_n_threads>>>(gpu_x, guess, per_thread, last_filled);
 
     jacobi_step<<<1,n_threads>>>(gpu_x, gpu_x_new, rhs, block_size);
-    update_padded<<<1,n_threads-1>>>(gpu_x_new, block_size);
 
-    cudaMemcpy(do_testow, gpu_x_new, gpu_size * sizeof(double), cudaMemcpyDeviceToHost);
+    flatten_solution<<<1,n_threads>>>(gpu_x_new, gpu_solution, size, block_size);
 
-    int i;
-    for(i=0;i<gpu_size;i++)
-    {
-        printf("%lf    %d\n", do_testow[i], i);
-    }
+    cudaMemcpy(solution, gpu_solution, size * sizeof(double), cudaMemcpyDeviceToHost);
+
+    cudaMemcpy(rhs, gpu_rhs, size * sizeof(double), cudaMemcpyDeviceToHost);
+    test_solution(rhs, rhs, size);
 }
