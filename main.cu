@@ -35,12 +35,7 @@ int main()
     initial_guess_begin<<<1,n_threads>>>(gpu_x, guess, per_thread);
     initial_guess_finish<<<1,red_n_threads>>>(gpu_x, guess, per_thread, last_filled);
 
-    jacobi_step<<<1,n_threads>>>(gpu_x, gpu_x_new, gpu_rhs, block_size);
-    update_padded<<<1,n_threads-1>>>(gpu_x_new, block_size);
-
-    flatten_solution<<<1,n_threads>>>(gpu_x_new, gpu_solution, size, block_size);
-
-    cudaMemcpy(solution, gpu_solution, size * sizeof(double), cudaMemcpyDeviceToHost);
+    jacobi_solve(1, gpu_x, gpu_x_new, gpu_rhs, block_size, solution, size, n_threads);
 
     cudaMemcpy(rhs, gpu_rhs, size * sizeof(double), cudaMemcpyDeviceToHost);
     test_solution(rhs, solution, size);

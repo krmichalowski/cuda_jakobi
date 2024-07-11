@@ -74,8 +74,7 @@ void test_solution(double* rhs, double* x, int size)
     int i;
     for(i=1;i<size-1;i++)
     {
-        //printf("%lf\n", rhs[i] - 4*x[i] - 2*x[i + 1] - 2*x[i - 1]);
-        printf("%lf\n", x[i]);
+        printf("%lf\n", rhs[i] - 4*x[i] - 1*x[i + 1] - 1*x[i - 1]);
     }
 }
 
@@ -99,10 +98,10 @@ void jacobi_solve(int n_iter, double* gpu_x, double* gpu_x_new, double* gpu_rhs,
     for(i=0;i<n_iter;i++)
     {
         jacobi_step<<<1,n_threads>>>(gpu_x, gpu_x_new, gpu_rhs, block_size);
-        //update_padded<<<1,n_threads-1>>>(gpu_x_new, block_size);
-        //double* tmp = gpu_x;
-        //gpu_x = gpu_x_new;
-        //gpu_x_new = tmp;
+        update_padded<<<1,n_threads-1>>>(gpu_x_new, block_size);
+        double* tmp = gpu_x;
+        gpu_x = gpu_x_new;
+        gpu_x_new = tmp;
     }
 
     flatten_solution<<<1,n_threads>>>(gpu_x, gpu_solution, size, block_size);
