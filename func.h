@@ -2,7 +2,7 @@
 
 void plan_distribution(int gpu_size, int n_threads, int* per_thread, int* red_n_threads, int* last_filled);
 
-__global__ void set_boundry(double* gpu_x, double* rhs, double* gpu_x_new, double* gpu_solution, double x0, double xn, int gpu_size, int size);
+__global__ void set_boundry(double* gpu_x, double* rhs, double* gpu_x_new, double x0, double xn, int gpu_size, int size);
 
 __global__ void set_single_boundry(double* gpu_solution, int size, double x0, double xn);
 
