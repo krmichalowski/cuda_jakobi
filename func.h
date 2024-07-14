@@ -20,4 +20,4 @@ void test_solution(double* rhs, double* x, int size);
 
 __global__ void flatten_solution(double* gpu_x, double* gpu_x_flatten, int size, int block_size);
 
-void jacobi_solve(int n_iter, double* gpu_x, double* gpu_x_new, double* gpu_rhs, int block_size, double* solution, int size, int n_threads);
+void jacobi_solve(int n_iter, double* gpu_x, double* gpu_x_new, double* gpu_rhs, int block_size, double* solution, int size, int n_threads, int n_thread_blocks);
