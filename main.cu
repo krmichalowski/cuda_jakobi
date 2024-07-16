@@ -4,10 +4,10 @@
 
 int main()
 {
-    //size-2, has to be devisible by number of threads
-    int size = 514;
+    //size-2, has to be devisible by total number of threads
+    int size = 2560002;
     int n_threads = 128;
-    int n_thread_blocks = 4;
+    int n_thread_blocks = 10;
     int total_n_threads = n_threads * n_thread_blocks; 
 
     /*block consists of nodes assigned to a single thread, for the blocks to be independent
@@ -37,22 +37,25 @@ int main()
     int last_filled;
     plan_distribution(gpu_size, total_n_threads, &per_thread, &red_n_threads, &last_filled);
     initial_guess_begin<<<n_thread_blocks,n_threads>>>(gpu_x, guess, per_thread);
-    initial_guess_finish<<<1,total_n_threads>>>(gpu_x, guess, per_thread, last_filled);
+    initial_guess_finish<<<1,red_n_threads>>>(gpu_x, guess, per_thread, last_filled);
 
-    jacobi_solve(1, gpu_x, gpu_x_new, gpu_rhs, block_size, solution, size, n_threads, n_thread_blocks);
+    jacobi_solve(10000, gpu_x, gpu_x_new, gpu_rhs, block_size, solution, size, n_threads, n_thread_blocks);
 
     cudaMemcpy(rhs, gpu_rhs, size * sizeof(double), cudaMemcpyDeviceToHost);
 
     //commented due to the size of the problem
-    test_solution(rhs, solution, size);
+    //test_solution(rhs, solution, size);
+
+    //testing at random points:
+    printf("%lf\n", rhs[1] - 4*solution[1] - 1*solution[1 + 1] - 1*solution[1 - 1]);
+    printf("%lf\n", rhs[100] - 4*solution[100] - 1*solution[100 + 1] - 1*solution[100 - 1]);
+    printf("%lf\n", rhs[25678] - 4*solution[25678] - 1*solution[25678 + 1] - 1*solution[25678 - 1]);
+    printf("%lf\n", rhs[size - 5] - 4*solution[size - 5] - 1*solution[size - 5 + 1] - 1*solution[size - 5 - 1]);
+    printf("%lf\n", rhs[size - 2] - 4*solution[size - 2] - 1*solution[size - 2 + 1] - 1*solution[size - 2 - 1]);
 
     cudaFree(gpu_x);
     cudaFree(gpu_x_new);
     cudaFree(gpu_rhs);
-    //printf("%lf\n", rhs[100] - 4*solution[100] - 1*solution[100 + 1] - 1*solution[100 - 1]);
-    //printf("%lf\n", rhs[25678] - 4*solution[25678] - 1*solution[25678 + 1] - 1*solution[25678 - 1]);
-    //printf("%lf\n", rhs[size - 5] - 4*solution[size - 5] - 1*solution[size - 5 + 1] - 1*solution[size - 5 - 1]);
-    //printf("%lf\n", rhs[size - 1] - 4*solution[size - 1] - 1*solution[size - 1 + 1] - 1*solution[size - 1 - 1]);
     free(rhs);
     free(solution);
 }

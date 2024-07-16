@@ -100,8 +100,8 @@ void test_solution(double* rhs, double* x, int size)
     int i;
     for(i=1;i<size-1;i++)
     {
-        //printf("%lf   %d\n", rhs[i] - 4*x[i] - 1*x[i + 1] - 1*x[i - 1], i);
-        printf("%lf\n", x[i]);
+        printf("%lf   %d\n", rhs[i] - 4*x[i] - 1*x[i + 1] - 1*x[i - 1], i);
+        //printf("%lf    %d\n", x[i], i);
     }
 }
 
